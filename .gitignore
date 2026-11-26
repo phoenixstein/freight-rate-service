@@ -221,3 +221,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# client data and models trained on it (never upload)
+data/
+models/
+validation_predictions.csv
