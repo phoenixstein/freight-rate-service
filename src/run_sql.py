@@ -26,7 +26,12 @@ for query in no_comments.split(";"):        # each query ends with a semicolon
     print("-" * 70)                         # a divider line
     print(clean)                            # show the query being run
     print()
-    print(pd.read_sql_query(clean, connection).to_string(index=False))   # run it, print the answer
+    if clean.upper().startswith(("SELECT", "WITH")):          # a question: run it and show the answer
+        print(pd.read_sql_query(clean, connection).to_string(index=False))
+    else:                                                     # an action (DROP/CREATE): just do it
+        connection.execute(clean)                             # run the statement
+        connection.commit()                                   # save the change to the file
+        print("OK (statement ran; nothing to show)")   # run it, print the answer
     print()
 
 connection.close()                          # close the database
