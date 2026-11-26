@@ -50,6 +50,16 @@ def predict_loads(bundle, df):
     per_mile = np.exp(bundle["model"].predict(X))                # undo the log: dollars per mile
     return np.clip(per_mile * clean["distance"].values, 1.0, None)   # times miles; never below $1
 
+def predict_with_day_median(bundle, df, day_quote_median):
+    """Like predict_loads, but the day's typical quote is GIVEN (looked up), not computed from df.
+    Needed for single requests: one row cannot work out a daily median by itself."""
+    clean = clean_inputs(df, bundle["fills"])                    # same fixes as training
+    X = build_features(clean, {"day_features": False})           # the standard columns only
+    X["day_quote_median"] = day_quote_median                     # the looked-up typical quote that day
+    X["quote_vs_day"] = clean["quote_signal"] / day_quote_median # this load's quote vs the day's
+    X = X[bundle["feature_columns"]]                             # same column order as training
+    per_mile = np.exp(bundle["model"].predict(X))                # undo the log: dollars per mile
+    return np.clip(per_mile * clean["distance"].values, 1.0, None)   # times miles; never below $1
 
 if __name__ == "__main__":
     train_and_save()                                             # 1. train and save
