@@ -21,7 +21,7 @@ FROM train_loads
 GROUP BY equipment
 ORDER BY loads DESC;
 
--- 4. Spike loads per month (ratio = real price / (quote x distance); up > 2, down < 0.6).
+-- 4. Spike loads per month. ratio = real price / (quote x distance). Up means above 2, down means below 0.6.
 SELECT substr(date, 1, 7) AS month,
        COUNT(*) AS loads,
        SUM(CASE WHEN posted_rate * 1.0 / (quote_signal * distance) > 2   THEN 1 ELSE 0 END) AS spike_up,

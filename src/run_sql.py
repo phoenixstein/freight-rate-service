@@ -10,13 +10,18 @@ pd.set_option("display.max_columns", 30)    # show up to 30 columns
 
 sql_file = sys.argv[1]                      # the .sql file path typed by the user
 text = open(sql_file, encoding="utf-8").read()   # read the whole file as text
+
+# Remove comment lines (they start with --) BEFORE splitting,
+# so a semicolon hiding inside a comment can never cut a query in half.
+no_comments = "\n".join(
+    line for line in text.splitlines() if not line.strip().startswith("--")
+)
+
 connection = sqlite3.connect("data/freight.db")  # open the database
 
-for query in text.split(";"):               # each query ends with a semicolon
-    # Drop comment lines (they start with --) so we can see if anything is left.
-    lines = [line for line in query.splitlines() if not line.strip().startswith("--")]
-    clean = "\n".join(lines).strip()
-    if not clean:                           # nothing but comments: skip it
+for query in no_comments.split(";"):        # each query ends with a semicolon
+    clean = query.strip()                   # trim spaces and blank lines
+    if not clean:                           # nothing left: skip it
         continue
     print("-" * 70)                         # a divider line
     print(clean)                            # show the query being run
